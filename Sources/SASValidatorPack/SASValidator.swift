@@ -26,7 +26,7 @@ public class SASValidator: NSObject {
     weak var delegate: SASValidatorDelegate?
     var delayTimer = Timer()
     
-    public init(viewController: UIViewController, textfields: [UITextField]) {
+    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage) {
         super.init()
         self.viewController = viewController
         self.textfields = textfields
@@ -34,7 +34,7 @@ public class SASValidator: NSObject {
         self.view = view
         delegate = viewController as? SASValidatorDelegate
         validatingTextFields()
-        setUpValidator()
+        setUpValidator(errorImage)
 
     }
     
@@ -58,16 +58,17 @@ public class SASValidator: NSObject {
         validator.validate(self)
     }
     
-    func setUpValidator() {
+    func setUpValidator(_ errorImage: UIImage) {
         for (i,v) in textfields.enumerated() {
             let subView = UIView()
             subView.backgroundColor = .clear
             subView.isHidden = true
             let btn = UIButton()
             btn.tag = i
-            btn.setImage(#imageLiteral(resourceName: "alertIcon"), for: .normal)
+            btn.setImage(errorImage, for: .normal)
+            btn.tintColor = .red
             btn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10 )
-            
+            btn.imageView?.contentMode = .scaleAspectFit
             views.append(subView)
             btn.addTarget(self, action: #selector(btnAction), for: .touchUpInside)
             subView.addSubview(btn)
@@ -187,6 +188,17 @@ public class SASValidator: NSObject {
             let i = arg.offset
             v.isHidden = validator.errors[textfields[i]] == nil ? true : false
             errorTexts.append(validator.errors[textfields[i]]?.errorMessage ?? "nil")
+        }
+    }
+    
+    public func hidderErrorForThis(_ textField: UITextField) {
+        
+        textfields.enumerated().forEach { (arg) in
+            let tf = arg.element
+            let i = arg.offset
+            if tf ==  textField {
+                views[i].isHidden = true
+            }
         }
     }
 }
