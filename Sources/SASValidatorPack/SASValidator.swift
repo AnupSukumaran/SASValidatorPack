@@ -26,7 +26,7 @@ public class SASValidator: NSObject {
     weak var delegate: SASValidatorDelegate?
     var delayTimer = Timer()
     
-    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage) {
+    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)) {
         super.init()
         self.viewController = viewController
         self.textfields = textfields
@@ -34,7 +34,7 @@ public class SASValidator: NSObject {
         self.view = view
         delegate = viewController as? SASValidatorDelegate
         validatingTextFields()
-        setUpValidator(errorImage)
+        setUpValidator(errorImage, alertImgInset)
 
     }
     
@@ -58,7 +58,7 @@ public class SASValidator: NSObject {
         validator.validate(self)
     }
     
-    func setUpValidator(_ errorImage: UIImage) {
+    func setUpValidator(_ errorImage: UIImage,_ alertImgInset: UIEdgeInsets) {
         for (i,v) in textfields.enumerated() {
             let subView = UIView()
             subView.backgroundColor = .clear
@@ -67,7 +67,7 @@ public class SASValidator: NSObject {
             btn.tag = i
             btn.setImage(errorImage, for: .normal)
             btn.tintColor = .red
-            btn.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10 )
+            btn.imageEdgeInsets = alertImgInset //UIEdgeInsets(top: 2, left: 10, bottom: 10, right: 10)
             btn.imageView?.contentMode = .scaleAspectFit
             views.append(subView)
             btn.addTarget(self, action: #selector(btnAction), for: .touchUpInside)
@@ -85,9 +85,7 @@ public class SASValidator: NSObject {
             NSLayoutConstraint(item: subView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 40).isActive = true
             
             NSLayoutConstraint(item: subView, attribute: .height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: v.frame.height).isActive = true
-            
-            
-            
+
             NSLayoutConstraint(item: btn, attribute: .centerX, relatedBy: .equal, toItem: subView, attribute: .centerX, multiplier: 1, constant: 0).isActive = true
             
             NSLayoutConstraint(item: btn, attribute: .centerY, relatedBy: .equal, toItem: subView, attribute: .centerY, multiplier: 1, constant: 0).isActive = true
@@ -161,7 +159,7 @@ public class SASValidator: NSObject {
     }
     
     @objc func btnAction(_ sender: UIButton) {
-        
+        viewController.view.endEditing(true)
         removeAlert()
         errorAlert(errorTexts[sender.tag])
         
