@@ -20,7 +20,7 @@ public class SASValidator: NSObject {
     var viewController = UIViewController()
     var textfields = [UITextField]()
     var view = UIView()
-    var views = [UIView]()
+    public var views = [UIView]()
     var errorTexts = [String]()
     let validator = Validator()
     weak var delegate: SASValidatorDelegate?
@@ -162,7 +162,6 @@ public class SASValidator: NSObject {
         viewController.view.endEditing(true)
         removeAlert()
         errorAlert(errorTexts[sender.tag])
-        
         
     }
     
