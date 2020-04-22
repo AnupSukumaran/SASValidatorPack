@@ -25,8 +25,10 @@ public class SASValidator: NSObject {
     let validator = Validator()
     weak var delegate: SASValidatorDelegate?
     var delayTimer = Timer()
+    var textColor: UIColor = .black
+    var bgc: UIColor = .white
     
-    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)) {
+    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
         super.init()
         self.viewController = viewController
         self.textfields = textfields
@@ -35,7 +37,8 @@ public class SASValidator: NSObject {
         delegate = viewController as? SASValidatorDelegate
         validatingTextFields()
         setUpValidator(errorImage, alertImgInset)
-
+        self.textColor = textColor
+        self.bgc = bgc
     }
     
     func validatingTextFields() {
@@ -97,7 +100,7 @@ public class SASValidator: NSObject {
         }
     }
     
-    func errorAlert(_ text: String, bgc: UIColor = .white) {
+    func errorAlert(_ text: String, bgc: UIColor = .white, textColor: UIColor = .black) {
         
         let errorSubview = UIView()
         errorSubview.tag = 500
@@ -114,7 +117,7 @@ public class SASValidator: NSObject {
         label.numberOfLines = 0
         label.text = text
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = textColor
         label.alpha = 0
         
         errorSubview.addSubview(label)
@@ -161,7 +164,7 @@ public class SASValidator: NSObject {
     @objc func btnAction(_ sender: UIButton) {
         viewController.view.endEditing(true)
         removeAlert()
-        errorAlert(errorTexts[sender.tag])
+        errorAlert(errorTexts[sender.tag], bgc: bgc, textColor: textColor)
         
     }
     
