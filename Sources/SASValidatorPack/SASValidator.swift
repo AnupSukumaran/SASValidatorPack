@@ -19,6 +19,7 @@ public class SASValidator: NSObject {
     
     var viewController = UIViewController()
     var textfields = [UITextField]()
+    var textFieldBaseView = [UIView]()
     var view = UIView()
     public var views = [UIView]()
     var errorTexts = [String]()
@@ -52,12 +53,16 @@ public class SASValidator: NSObject {
 //        self.bgc = bgc
 //    }
     
-    public init(delegate: SASValidatorDelegate, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
+    public init(delegate: SASValidatorDelegate, textfields: [UITextField],textFieldBaseView: [UIView]? = nil, errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
         super.init()
         //self.viewController = viewController
         self.textfields = textfields
 //        guard let view = viewController.view else {return}
 //        self.view = view
+        if let vis = textFieldBaseView {
+             self.textFieldBaseView = vis
+        }
+       
         self.delegate = delegate
         validatingTextFields()
         setUpValidator(errorImage, alertImgInset)
@@ -146,6 +151,59 @@ public class SASValidator: NSObject {
     }
     
     func setUpValidator(_ errorImage: UIImage,_ alertImgInset: UIEdgeInsets) {
+        
+        if !textFieldBaseView.isEmpty {
+            marksAddedOnViews(errorImage,alertImgInset)
+        } else {
+            marksAddedOnTextFields(errorImage,alertImgInset)
+        }
+ 
+    }
+    
+    func marksAddedOnViews(_ errorImage: UIImage,_ alertImgInset: UIEdgeInsets) {
+        for (i,v) in textFieldBaseView.enumerated() {
+            
+            let subView = UIView()
+            subView.backgroundColor = .clear
+            subView.isHidden = true
+            
+            let btn = UIButton()
+            btn.tag = i
+            btn.setImage(errorImage, for: .normal)
+            btn.tintColor = .red
+            btn.imageEdgeInsets = alertImgInset //UIEdgeInsets(top: 2, left: 10, bottom: 10, right: 10)
+            btn.imageView?.contentMode = .scaleAspectFit
+            btn.backgroundColor = .clear
+            views.append(subView)
+            
+            btn.addTarget(self, action: #selector(btnAction), for: .touchUpInside)
+            subView.addSubview(btn)
+            
+            v.addSubview(subView)
+            
+            btn.translatesAutoresizingMaskIntoConstraints = false
+            subView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint(item: subView, attribute: .trailing, relatedBy: .equal, toItem: v, attribute: .trailing, multiplier: 1, constant: 0).isActive = true
+            
+            NSLayoutConstraint(item: subView, attribute: .centerY, relatedBy: .equal, toItem: v, attribute: .centerY, multiplier: 1, constant: 0).isActive = true
+            
+            NSLayoutConstraint(item: subView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 40).isActive = true
+            
+            NSLayoutConstraint(item: subView, attribute: .height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: v.frame.height).isActive = true
+
+            NSLayoutConstraint(item: btn, attribute: .centerX, relatedBy: .equal, toItem: subView, attribute: .centerX, multiplier: 1, constant: 0).isActive = true
+            
+            NSLayoutConstraint(item: btn, attribute: .centerY, relatedBy: .equal, toItem: subView, attribute: .centerY, multiplier: 1, constant: 0).isActive = true
+            
+            NSLayoutConstraint(item: btn, attribute: .height, relatedBy: .equal, toItem: subView, attribute: .height, multiplier: 1, constant: subView.frame.height).isActive = true
+            
+             NSLayoutConstraint(item: btn, attribute: .width, relatedBy: .equal, toItem: subView, attribute: .width, multiplier: 1, constant: subView.frame.width ).isActive = true
+            
+        }
+    }
+    
+    func marksAddedOnTextFields(_ errorImage: UIImage,_ alertImgInset: UIEdgeInsets) {
         for (i,v) in textfields.enumerated() {
             let subView = UIView()
             subView.backgroundColor = .clear
