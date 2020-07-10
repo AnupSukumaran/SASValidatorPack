@@ -28,6 +28,12 @@ public class SASValidator: NSObject {
     var textColor: UIColor = .black
     var bgc: UIColor = .white
     
+    static var customAlertWindow: UIWindow = {
+        let win = UIWindow(frame: UIScreen.main.bounds)
+        win.windowLevel = UIWindow.Level.alert + 1
+        return win
+    }()
+    
     public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
         super.init()
         self.viewController = viewController
@@ -39,6 +45,53 @@ public class SASValidator: NSObject {
         setUpValidator(errorImage, alertImgInset)
         self.textColor = textColor
         self.bgc = bgc
+    }
+    
+    
+    
+    func show(_ sender: UIButton, _ text: String, bgc: UIColor = .white, textColor: UIColor = .black) {
+
+        if #available(iOS 13.0, *) {
+            //guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+            let windowScene = UIApplication.shared
+                                .connectedScenes
+                                .filter { ($0.activationState == .foregroundActive) || ($0.activationState == .foregroundInactive) }
+                                .first
+            
+            let vc = UIViewController()
+            vc.view.backgroundColor = .clear
+            
+            var win: UIWindow!
+            
+            if let windowScene = windowScene as? UIWindowScene {
+                win = UIWindow(windowScene: windowScene)
+
+                win.frame = UIScreen.main.bounds
+                win.windowLevel = UIWindow.Level.alert + 1
+
+            }
+
+           
+            win.rootViewController = vc
+            win.makeKeyAndVisible()
+            Self.customAlertWindow = win
+            errorAlertV2(vc: vc, text, bgc: bgc, textColor: textColor)
+            //vc.present(viewController, animated: true) {}
+
+
+        } else {
+           // guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+            let vc = UIViewController()
+
+            vc.view.backgroundColor = .clear
+            Self.customAlertWindow.rootViewController = vc
+            Self.customAlertWindow.makeKeyAndVisible()
+
+            errorAlertV2(vc: vc, text, bgc: bgc, textColor: textColor)
+           // vc.present(viewController, animated: true) {}
+        }
+
+
     }
     
     func validatingTextFields() {
@@ -99,6 +152,67 @@ public class SASValidator: NSObject {
             
         }
     }
+    
+    func errorAlertV2(vc: UIViewController,_ text: String, bgc: UIColor = .white, textColor: UIColor = .black) {
+           
+           let errorSubview = UIView()
+           errorSubview.tag = 500
+           
+           errorSubview.backgroundColor = bgc
+           errorSubview.layer.cornerRadius = 15
+           errorSubview.layer.shadowRadius = 5
+           errorSubview.layer.shadowColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+           errorSubview.layer.masksToBounds = false
+           errorSubview.layer.shadowOpacity = 0.8
+           
+           let label = UILabel()
+           label.backgroundColor = .clear
+           label.numberOfLines = 0
+           label.text = text
+           label.textAlignment = .center
+           label.textColor = textColor
+           label.alpha = 0
+           
+           errorSubview.addSubview(label)
+           
+            vc.view.addSubview(errorSubview)
+           
+           errorSubview.translatesAutoresizingMaskIntoConstraints = false
+           label.translatesAutoresizingMaskIntoConstraints = false
+       
+           let padding: CGFloat = 20
+           
+           NSLayoutConstraint(item: errorSubview, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0).isActive = true
+
+           NSLayoutConstraint(item: errorSubview, attribute: .width, relatedBy: .equal, toItem: view, attribute: .width, multiplier: 0.9, constant: 0).isActive = true
+           
+           NSLayoutConstraint(item: label, attribute: .top, relatedBy: .equal, toItem: errorSubview, attribute: .top, multiplier: 1, constant: padding).isActive = true
+           
+           NSLayoutConstraint(item: label, attribute: .bottom, relatedBy: .equal, toItem: errorSubview, attribute: .bottom, multiplier: 1, constant: -(padding)).isActive = true
+           
+           NSLayoutConstraint(item: label, attribute: .leading, relatedBy: .equal, toItem: errorSubview, attribute: .leading, multiplier: 1, constant: padding).isActive = true
+           
+            NSLayoutConstraint(item: label, attribute: .trailing, relatedBy: .equal, toItem: errorSubview, attribute: .trailing, multiplier: 1, constant: -(padding)).isActive = true
+           
+           
+           UIView.animate(withDuration: 0.4, animations: {
+               NSLayoutConstraint(item: errorSubview, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: -40).isActive = true
+               
+               errorSubview.layoutIfNeeded()
+           }) { (arg) in
+               UIView.animate(withDuration: 0.2) {
+                   label.alpha = 1
+               }
+           }
+
+           delayTimer.invalidate()
+           if #available(iOS 10.0, *) {
+               delayTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { (_) in
+                   self.removeAlert()
+               }
+           }
+    
+       }
     
     func errorAlert(_ text: String, bgc: UIColor = .white, textColor: UIColor = .black) {
         
@@ -164,6 +278,7 @@ public class SASValidator: NSObject {
     @objc func btnAction(_ sender: UIButton) {
         viewController.view.endEditing(true)
         removeAlert()
+        //show(sender, errorTexts[sender.tag], bgc: bgc, textColor: textColor)
         errorAlert(errorTexts[sender.tag], bgc: bgc, textColor: textColor)
         
     }
