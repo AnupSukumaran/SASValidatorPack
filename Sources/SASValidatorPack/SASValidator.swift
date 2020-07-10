@@ -34,13 +34,31 @@ public class SASValidator: NSObject {
         return win
     }()
     
-    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
+    var tapGesture:  UITapGestureRecognizer  {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        return tap
+    }
+    
+//    public init(viewController: UIViewController, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
+//        super.init()
+//        self.viewController = viewController
+//        self.textfields = textfields
+//        guard let view = viewController.view else {return}
+//        self.view = view
+//        delegate = viewController as? SASValidatorDelegate
+//        validatingTextFields()
+//        setUpValidator(errorImage, alertImgInset)
+//        self.textColor = textColor
+//        self.bgc = bgc
+//    }
+    
+    public init(delegate: SASValidatorDelegate, textfields: [UITextField], errorImage: UIImage, alertImgInset: UIEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10), textColor: UIColor = .black, bgc: UIColor = .white) {
         super.init()
-        self.viewController = viewController
+        //self.viewController = viewController
         self.textfields = textfields
-        guard let view = viewController.view else {return}
-        self.view = view
-        delegate = viewController as? SASValidatorDelegate
+//        guard let view = viewController.view else {return}
+//        self.view = view
+        self.delegate = delegate
         validatingTextFields()
         setUpValidator(errorImage, alertImgInset)
         self.textColor = textColor
@@ -75,6 +93,9 @@ public class SASValidator: NSObject {
             win.rootViewController = vc
             win.makeKeyAndVisible()
             Self.customAlertWindow = win
+            guard let v = vc.view else {return}
+            view = v
+            view.addGestureRecognizer(tapGesture)
             errorAlertV2(vc: vc, text, bgc: bgc, textColor: textColor)
             //vc.present(viewController, animated: true) {}
 
@@ -86,12 +107,22 @@ public class SASValidator: NSObject {
             vc.view.backgroundColor = .clear
             Self.customAlertWindow.rootViewController = vc
             Self.customAlertWindow.makeKeyAndVisible()
-
+            guard let v = vc.view else {return}
+            view = v
+    
+            view.addGestureRecognizer(tapGesture)
+//            let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
+//            view.addGestureRecognizer(tap)
             errorAlertV2(vc: vc, text, bgc: bgc, textColor: textColor)
            // vc.present(viewController, animated: true) {}
         }
 
 
+    }
+    
+    @objc func handleTap() {
+        delayTimer.invalidate()
+        removeAlert()
     }
     
     func validatingTextFields() {
@@ -278,8 +309,8 @@ public class SASValidator: NSObject {
     @objc func btnAction(_ sender: UIButton) {
         viewController.view.endEditing(true)
         removeAlert()
-        //show(sender, errorTexts[sender.tag], bgc: bgc, textColor: textColor)
-        errorAlert(errorTexts[sender.tag], bgc: bgc, textColor: textColor)
+        show(sender, errorTexts[sender.tag], bgc: bgc, textColor: textColor)
+        //errorAlert(errorTexts[sender.tag], bgc: bgc, textColor: textColor)
         
     }
     
@@ -292,6 +323,7 @@ public class SASValidator: NSObject {
                     subview.alpha = 0
                 }) { (arg) in
                     subview.removeFromSuperview()
+                    SASValidator.customAlertWindow.isHidden = true
                 }
             }
         }
