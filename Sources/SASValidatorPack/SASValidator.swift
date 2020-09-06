@@ -70,6 +70,14 @@ public class SASValidator: NSObject {
         self.bgc = bgc
     }
     
+    public init(delegate: SASValidatorDelegate, textfields: [UITextField]) {
+        super.init()
+        self.textfields = textfields
+        self.delegate = delegate
+        validatingTextFields()
+
+    }
+    
     
     
     func show(_ sender: UIButton, _ text: String, bgc: UIColor = .white, textColor: UIColor = .black) {
